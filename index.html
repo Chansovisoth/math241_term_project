@@ -19,12 +19,13 @@
             <input type="number" id="numCompanies" value="2" min="2" required>
             <button type="submit">Next</button>
         </form>
-        <form id="predictionForm" style="display: none;">
+        <form id="predictionForm" style="display: none; scrollbar-width: 5px ;">
             <div id="transitionMatrix"></div>
             <div id="initialState"></div>
             <label for="years">Enter the number of years to predict:</label>
             <input type="number" id="years" list="years-list" required>
             <button type="submit">Predict</button>
+            <button type="button" id="randomButton">Generate Random Values</button>
         </form>
         <div id="result" style="display: none;">
             <br>

@@ -17,11 +17,11 @@ function generateTransitionMatrixInputs(numCompanies) {
         const icon = i === numCompanies - 1 ? 'domain_disabled' : 'source_environment';
 
         heading.innerHTML = `
-                    <div class="d-flex align-items-center">
-                        <span class="material-symbols-outlined d-flex align-items-center" style="position: absolute;">${icon}</span>
-                        <span style="margin-left: 30px;">${companyName}</span>
-                    </div>
-                `;
+            <div class="d-flex align-items-center">
+                <span class="material-symbols-outlined d-flex align-items-center" style="position: absolute;">${icon}</span>
+                <span style="margin-left: 30px;">${companyName}</span>
+            </div>
+        `;
 
         transitionMatrixDiv.appendChild(heading);
 
@@ -34,7 +34,7 @@ function generateTransitionMatrixInputs(numCompanies) {
 
             const input = document.createElement('input');
             input.type = 'number';
-            input.id = `trans${i}${j}`;
+            input.id = `trans${i}_${j}`;
             input.step = '0.01';
             input.required = true;
 
@@ -47,8 +47,6 @@ function generateTransitionMatrixInputs(numCompanies) {
     const hr = document.createElement('hr');
     transitionMatrixDiv.appendChild(hr); // hr element after input field
 }
-
-
 
 function generateInitialStateInputs(numCompanies) {
     const initialStateDiv = document.getElementById('initialState');
@@ -86,7 +84,7 @@ document.getElementById('predictionForm').addEventListener('submit', function (e
     for (let i = 0; i < numCompanies; i++) {
         const row = [];
         for (let j = 0; j < numCompanies; j++) {
-            row.push(parseFloat(document.getElementById(`trans${i}${j}`).value));
+            row.push(parseFloat(document.getElementById(`trans${i}_${j}`).value));
         }
         transitionMatrix.push(row);
     }
@@ -127,14 +125,14 @@ function displayResult(matrix, initialState, futureState, numCompanies) {
 
     const companiesHeaders = Array.from({ length: numCompanies }, (_, i) => `<th>${i === numCompanies - 1 ? 'No Company' : 'Company ' + i}</th>`).join('');
 
-    matrixDisplay.innerHTML = '<table><tr>' + companiesHeaders + '</tr>' +
-        matrix.map(row => '<tr>' + row.map(val => `<td>${val.toFixed(4)}</td>`).join('') + '</tr>').join('') + '</table>';
+    matrixDisplay.innerHTML = '<div class="table-container" style="overflow-x: scroll;"><table><tr>' + companiesHeaders + '</tr>' +
+        matrix.map(row => '<tr>' + row.map(val => `<td>${val.toFixed(4)}</td>`).join('') + '</tr>').join('') + '</table></div>';
 
-    initialStateDisplay.innerHTML = '<table><tr>' + companiesHeaders + '</tr>' +
-        '<tr>' + initialState.map(val => `<td>${val.toFixed(4)}</td>`).join('') + '</tr></table>';
+    initialStateDisplay.innerHTML = '<div class="table-container" style="overflow-x: scroll;"><table><tr>' + companiesHeaders + '</tr>' +
+        '<tr>' + initialState.map(val => `<td>${val.toFixed(4)}</td>`).join('') + '</tr></table></div>';
 
-    futureStateDisplay.innerHTML = '<table><tr>' + companiesHeaders + '</tr>' +
-        '<tr>' + futureState.map(val => `<td>${val.toFixed(4)}</td>`).join('') + '</tr></table>';
+    futureStateDisplay.innerHTML = '<div class="table-container" style="overflow-x: scroll;"><table><tr>' + companiesHeaders + '</tr>' +
+        '<tr>' + futureState.map(val => `<td>${val.toFixed(4)}</td>`).join('') + '</tr></table></div>';
 
     document.getElementById('result').style.display = 'block';
 }
@@ -190,3 +188,57 @@ function getRandomColor() {
     }
     return color;
 }
+
+function generateRandomValues(numCompanies) {
+    // Generate random transition probabilities
+    for (let i = 0; i < numCompanies; i++) {
+        let rowSum = 0;
+        const row = [];
+
+        // Generate random values for each column
+        for (let j = 0; j < numCompanies; j++) {
+            const value = Math.random();
+            row.push(value);
+            rowSum += value;
+        }
+
+        // Normalize the row so that the sum is 1
+        for (let j = 0; j < numCompanies; j++) {
+            const normalizedValue = row[j] / rowSum;
+            const element = document.getElementById(`trans${i}_${j}`);
+            if (element) {
+                element.value = normalizedValue.toFixed(2);
+            } else {
+                console.error(`Element with id trans${i}_${j} not found.`);
+            }
+        }
+    }
+
+    // Generate random initial subscribers
+    const initialState = [];
+    let initialStateSum = 0;
+
+    for (let i = 0; i < numCompanies - 1; i++) { // We generate values only for the companies, not "No Company"
+        const value = Math.floor(Math.random() * 1000) + 1; // Ensure more than 0
+        initialState.push(value);
+        initialStateSum += value;
+    }
+
+    // Set the initial subscribers values
+    for (let i = 0; i < numCompanies - 1; i++) {
+        const element = document.getElementById(`init${i}`);
+        if (element) {
+            element.value = initialState[i];
+        } else {
+            console.error(`Element with id init${i} not found.`);
+        }
+    }
+
+    // Set the total households
+    document.getElementById('totalHouseholds').value = initialStateSum;
+}
+
+document.getElementById('randomButton').addEventListener('click', function () {
+    const numCompanies = parseInt(document.getElementById('numCompanies').value) + 1;
+    generateRandomValues(numCompanies);
+});
